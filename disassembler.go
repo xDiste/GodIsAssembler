@@ -19,6 +19,15 @@ func newDisassembler() *disassembler{
 	}
 }
 
+// Init the capstone engine
+func capstoneInit() *gapstone.Engine {
+	engine, err := gapstone.New(gapstone.CS_ARCH_X86, gapstone.CS_MODE_64)
+	if err != nil {
+		return nil
+	}
+	return &engine
+}
+
 func (disass *disassembler) disassemble(exec *elf.File){
 	// Take all sections
 	sections := exec.Sections
@@ -49,13 +58,4 @@ func (disass *disassembler) disassemble(exec *elf.File){
 		}
 	}
 	fmt.Printf("Total number number of instructions: %d\n", nInstructions)	
-}
-
-// Init the capstone engine
-func capstoneInit() *gapstone.Engine {
-	engine, err := gapstone.New(gapstone.CS_ARCH_X86, gapstone.CS_MODE_64)
-	if err != nil {
-		return nil
-	}
-	return &engine
 }
