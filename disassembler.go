@@ -20,24 +20,35 @@ func newDisassembler() *disassembler{
 }
 
 func (disass *disassembler) disassemble(exec *elf.File){
-	// Find the code section and his size
-	codeSection := exec.Section(".text")
-	codeSectionLen := codeSection.Size
+	// Take all sections
+	sections := exec.Sections
+	nInstructions := 0
+	for i := 1; i < len(sections); i++ {
+		// Take only this sections
+		if sections[i].Name == ".init" || sections[i].Name == ".plt" || sections[i].Name == ".text" || sections[i].Name == ".fini" {
+			fmt.Printf("Disassembly of section <%s>:\n\n", sections[i].Name)
+			currSection := sections[i]
+			currSectionLen := sections[i].Size
 
-	// Extract the data
-	codeData, _ := codeSection.Data()
+			// Extract the data
+			currSectionData, _ := currSection.Data()
 
-	// Find the entrypoint
-	//entrypointAddr := exec.Entry
+			// Find the start address
+			startAddress := currSection.Addr
 
-	// Take all the instructions
-	assemblyCode, _ := disass.capstone_engine.Disasm(codeData, 0, codeSectionLen)
-	
-	// Print each instruction in a fancy way
-	for i := 0; i < len(assemblyCode); i++ {
-		fmt.Printf("0x%x:\t%s\t\t%s\n", assemblyCode[i].Address, assemblyCode[i].Mnemonic, assemblyCode[i].OpStr)
+			// Take all the instructions
+			assemblyCode, _ := disass.capstone_engine.Disasm(currSectionData, startAddress, currSectionLen)
+			
+			// Print each instruction in a fancy way
+			for i := 0; i < len(assemblyCode); i++ {
+				fmt.Printf("\t0x%x:\t%s\t\t%s\n", assemblyCode[i].Address, assemblyCode[i].Mnemonic, assemblyCode[i].OpStr)
+			}
+			// Count instructions
+			nInstructions += len(assemblyCode)
+			fmt.Printf("\n")
+		}
 	}
-	fmt.Printf("Total number number of instructions: %d\n", len(assemblyCode))	
+	fmt.Printf("Total number number of instructions: %d\n", nInstructions)	
 }
 
 // Init the capstone engine
