@@ -1,7 +1,7 @@
 package main
 
 import (
-    "fmt"
+	"fmt"
 	"debug/elf"
 
 	"github.com/knightsc/gapstone"
